@@ -1,0 +1,142 @@
+<div class="space-y-4 sm:space-y-6 animate-fade-in">
+  <!-- Navigation Bar -->
+  <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-3 sm:p-4 lg:p-6">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+      <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <a href="/tracker?date=<%= prevDate %>" class="nav-btn-secondary p-2 sm:p-2.5" title="Previous Day">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </a>
+        
+        <div class="flex flex-col items-center sm:items-start flex-1">
+          <input 
+            type="date" 
+            id="date-picker" 
+            value="<%= date %>" 
+            class="w-full px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 font-medium focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
+          >
+          <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <%= date === today ? 'Today' : new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) %>
+          </span>
+        </div>
+        
+        <a href="/tracker?date=<%= nextDate %>" class="nav-btn-secondary p-2 sm:p-2.5" title="Next Day">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+      
+      <a href="/tracker?date=<%= today %>" class="nav-btn-primary px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base <%= date === today ? 'opacity-50 cursor-not-allowed' : '' %> w-full sm:w-auto">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span class="ml-2">Today</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Dashboard Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
+    <!-- Productivity Score -->
+    <div class="stat-card col-span-2 sm:col-span-1 lg:col-span-1 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-2 sm:p-3">
+      <div class="flex items-center gap-2 mb-2">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        </svg>
+        <span class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Productivity</span>
+      </div>
+      <div class="flex items-end gap-2">
+        <span id="productivity-score" class="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400"><%= productivityPercentage %>%</span>
+      </div>
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
+        <div id="productivity-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500" style="width: <%= productivityPercentage %>%"></div>
+      </div>
+    </div>
+
+    <% Object.entries(activities).filter(([key]) => key !== 'none').forEach(([key, activity]) { %>
+      <div class="stat-card hover:shadow-lg transition-shadow duration-300 p-2 sm:p-3">
+        <div class="flex items-center gap-2 mb-1">
+          <div class="w-3 h-3 rounded-full <%= activity.color %>"></div>
+          <span class="text-xs font-medium text-gray-600 dark:text-gray-400"><%= activity.label %></span>
+        </div>
+        <span id="stat-<%= key %>" class="text-lg sm:text-2xl font-bold text-gray-800 dark:text-gray-200"><%= stats[key] || 0 %>h</span>
+      </div>
+    <% }); %>
+  </div>
+
+  <!-- Legend -->
+  <div class="flex flex-wrap gap-1.5 sm:gap-2 text-xs">
+    <% Object.entries(activities).filter(([key]) => key !== 'none').forEach(([key, activity]) { %>
+      <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-100 dark:bg-slate-700">
+        <div class="w-2 h-2 rounded-full <%= activity.color %>"></div>
+        <span class="text-gray-600 dark:text-gray-400"><%= activity.label %></span>
+      </div>
+    <% }); %>
+  </div>
+
+  <!-- 24-Hour Grid -->
+  <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+    <div class="p-3 sm:p-4 lg:p-6 border-b border-gray-100 dark:border-slate-700">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">Daily Schedule</h2>
+      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">Click on any hour block to track your activities</p>
+    </div>
+    
+    <div class="divide-y divide-gray-100 dark:divide-slate-700">
+      <% hours.forEach((h, index) => { %>
+        <div 
+          class="hour-row group flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors <%= index % 2 === 0 ? 'bg-white/50 dark:bg-slate-800/50' : '' %>"
+          data-hour="<%= h.hour %>"
+          data-date="<%= date %>"
+        >
+          <!-- Time Label -->
+          <div class="flex items-center gap-2 sm:gap-3 sm:w-24 flex-shrink-0">
+            <span class="text-xs sm:text-sm font-mono font-medium text-gray-600 dark:text-gray-400 w-10 sm:w-12"><%= h.timeLabel %></span>
+            <% if (h.hour >= 6 && h.hour < 18) { %>
+              <svg class="w-3 h-3 sm:w-4 sm:h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <% } else { %>
+              <svg class="w-3 h-3 sm:w-4 sm:h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646A9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <% } %>
+          </div>
+          
+          <!-- Activity Block -->
+          <div class="flex-1 w-full">
+            <div 
+              id="block-<%= h.hour %>"
+              class="hour-block <%= activities[h.entry.activity].color %> <%= activities[h.entry.activity].text %> <%= activities[h.entry.activity].border %> p-2 sm:p-3 lg:p-4"
+            >
+              <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <!-- Activity Select -->
+                <select 
+                  class="activity-select w-full sm:w-40 text-xs sm:text-sm"
+                  data-hour="<%= h.hour %>"
+                  onchange="updateActivity(this)"
+                >
+                  <% Object.entries(activities).forEach(([key, activity]) { %>
+                    <option value="<%= key %>" <%= h.entry.activity === key ? 'selected' : '' %>><%= activity.label %></option>
+                  <% }); %>
+                </select>
+                
+                <!-- Note Input -->
+                <input 
+                  type="text" 
+                  class="note-input flex-1 text-xs sm:text-sm"
+                  placeholder="Add a note..."
+                  value="<%= h.entry.note || '' %>"
+                  data-hour="<%= h.hour %>"
+                  onchange="updateNote(this)"
+                >
+              </div>
+            </div>
+          </div>
+          
+          <!-- Status Indicator -->
+          <div class="flex items-center justify-center sm:w-8 flex-shrink-0">
+            <div id="status-<%= h.hour %>" class="w-2 h-2 rounded-full <%= h.entry.activity !== 'none' ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600' %> transition-colors"></div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
